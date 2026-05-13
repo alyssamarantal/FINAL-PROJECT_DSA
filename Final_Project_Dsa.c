@@ -8,8 +8,8 @@
 #define MAX 100
 
 // Function prototypes
-void printReceipt(char student[], char item[], char date[], char time[]);
-void logBorrow(char student[], char item[], char date[], char time[]);
+void printReceipt(char student[], char item[], char date[], char time[], int priority);
+void logBorrow(char student[], char item[], char date[], char time[], int priority);
 void logReturn(char student[], char item[]);
 int searchEquipment(char name[]);
 int isValidEquipment(char name[]);
@@ -42,8 +42,8 @@ struct node *front = NULL;
 
 // Helper: Checks if string is all uppercase
 int isAllUppercase(char str[]) {
-	int i;
-    for ( i = 0; str[i] != '\0'; i++) {
+    int i;
+    for (i = 0; str[i] != '\0'; i++) {
         if (islower(str[i])) return 0;
     }
     return 1;
@@ -76,7 +76,7 @@ void addEquipment() {
         eq[index].quantity += qty;
         printf("Quantity updated! New quantity: %d pcs\n", eq[index].quantity);
     } else {
-        printf("\nEnter category (Audio Visual /Cable /Accessory): ");
+        printf("\nEnter category (Audio Visual / Cable / Accessory): ");
         scanf(" %[^\n]", category);
         strcpy(eq[count].name, name);
         strcpy(eq[count].category, category);
@@ -96,14 +96,14 @@ void displayEquipment() {
     printf("| %-3s | %-15s | %-12s | %-3s |\n", "No", "Name", "Category", "Qty");
     printf("-----------------------------------------------\n");
     int i;
-    for ( i = 0; i < count; i++) {
+    for (i = 0; i < count; i++) {
         printf("| %-3d | %-15s | %-12s | %-3d |\n", i + 1, eq[i].name, eq[i].category, eq[i].quantity);
     }
 }
 
 int searchEquipment(char name[]) {
-	int i;
-    for ( i = 0; i < count; i++) {
+    int i;
+    for (i = 0; i < count; i++) {
         if (strcmp(eq[i].name, name) == 0) return i;
     }
     return -1;
@@ -112,9 +112,9 @@ int searchEquipment(char name[]) {
 void sortEquipment() {
     struct equipment temp;
     int i;
-    for ( i = 0; i < count - 1; i++) {
-    	int j;
-        for ( j = 0; j < count - i - 1; j++) {
+    for (i = 0; i < count - 1; i++) {
+        int j;
+        for (j = 0; j < count - i - 1; j++) {
             if (strcmp(eq[j].name, eq[j + 1].name) > 0) {
                 temp = eq[j];
                 eq[j] = eq[j + 1];
@@ -147,22 +147,11 @@ void insert(char student[], char item[], int priority, char date[], char time[])
     }
 }
 
-void processQueue() {
-    if (front == NULL) {
-        printf("No queue to process.\n");
-        return;
-    }
-    struct node *temp = front;
-    front = front->next;
-    printf("Processed: %s borrowed %s\n", temp->student, temp->equipment);
-    free(temp);
-}
-
 void borrowEquipment() {
     char student[50], item[50], date[20], timeStr[20];
     int priority, index;
 
-    printf("Enter student name: ");
+    printf("Enter name: ");
     scanf(" %[^\n]", student);
 
     printf("\nEnter equipment (CAPS): ");
@@ -193,8 +182,8 @@ void borrowEquipment() {
     eq[index].quantity--;
     insert(student, item, priority, date, timeStr);
     printf("Borrow recorded successfully!\n");
-    printReceipt(student, item, date, timeStr);
-    logBorrow(student, item, date, timeStr);
+    printReceipt(student, item, date, timeStr, priority);
+    logBorrow(student, item, date, timeStr, priority);
 }
 
 void returnEquipment() {
@@ -205,7 +194,7 @@ void returnEquipment() {
     scanf(" %[^\n]", item);
 
     int index = searchEquipment(item);
-    if (index == -1) {;
+    if (index == -1) {
         printf("Equipment not found!\n");
         return;
     }
@@ -228,12 +217,13 @@ void returnEquipment() {
     printf("No record found for this student and equipment!\n");
 }
 
+
 void searchByCategory() {
-     char cat[50];
+    char cat[50];
     int i, found = 0;
 
-    printf("Enter category to search: ");
-    scanf("%s", cat);
+    printf("Enter category to search (Audio Visual / Cable / Accessory): ");
+    scanf(" %[^\n]", cat); 
 
     printf("\n-------------------------------------------------\n");
     printf("         SEARCH RESULT (Category: %s)\n", cat);
@@ -259,15 +249,15 @@ void searchByCategory() {
 
 void filterMenu() {
     int choice, i, found = 0;
-    
-   printf("\nFilter by Category:\n");
+
+    printf("\nFilter by Category:\n");
     printf("[1] Audio Visual\n");
     printf("[2] Cable\n");
     printf("[3] Accessory\n");
     printf("\nEnter choice: ");
     scanf("%d", &choice);
 
-   const char *selected;
+    const char *selected;
 
     if (choice == 1) selected = "Audio Visual";
     else if (choice == 2) selected = "Cable";
@@ -280,7 +270,7 @@ void filterMenu() {
     printf("\n----------------------------------------------\n");
     printf("        FILTERED: %s\n", selected);
     printf("------------------------------------------------\n");
-         
+
     for (i = 0; i < count; i++) {
         if (strcmp(eq[i].category, selected) == 0) {
             printf("%-5d %-15s %-15s %-10d pcs\n",
@@ -299,28 +289,45 @@ void filterMenu() {
     printf("------------------------------------------------\n");
 }
 
+// FIX: Added Priority column to the borrow list display
 void displayQueue() {
     struct node *temp = front;
     if (temp == NULL) { printf("No borrowing records.\n"); return; }
-    printf("\n| %-15s | %-10s | %-12s | %-6s |\n", "Name", "Equipment", "Date", "Time");
+
+    printf("\n| %-15s | %-10s | %-12s | %-6s | %-8s | %-10s |\n",
+           "Name", "Equipment", "Date", "Time", "Priority", "Type");
+    printf("|-----------------|------------|--------------|--------|----------|------------|\n");
+
     while (temp != NULL) {
-        printf("| %-15s | %-10s | %-12s | %-6s |\n", temp->student, temp->equipment, temp->date, temp->time);
+        printf("| %-15s | %-10s | %-12s | %-6s | %-8d | %-10s |\n",
+               temp->student,
+               temp->equipment,
+               temp->date,
+               temp->time,
+               temp->priority,                                    
+               temp->priority == 1 ? "Teacher" : "Student");     
         temp = temp->next;
     }
 }
 
-void printReceipt(char student[], char item[], char date[], char time[]) {
+void printReceipt(char student[], char item[], char date[], char time[], int priority) {
     printf("\n==================== RECEIPT ===============\n");
     printf("             Name      : %s\n", student);
     printf("             Equipment : %s\n", item);
     printf("             Date      : %s\n", date);
     printf("             Time      : %s\n", time);
+    printf("             Priority  : %d (%s)\n", priority, priority == 1 ? "Teacher" : "Student");
     printf("=============================================\n");
 }
-    
-void logBorrow(char student[], char item[], char date[], char time[]) {
+
+void logBorrow(char student[], char item[], char date[], char time[], int priority) {
     FILE *fp = fopen("borrow_history.txt", "a");
-    if (fp) { fprintf(fp, "%s borrowed %s on %s at %s\n", student, item, date, time); fclose(fp); }
+    if (fp) {
+        fprintf(fp, "%s borrowed %s on %s at %s [Priority: %d - %s]\n",
+                student, item, date, time,
+                priority, priority == 1 ? "Teacher" : "Student");  
+        fclose(fp);
+    }
 }
 
 void logReturn(char student[], char item[]) {
@@ -357,7 +364,7 @@ void deleteEquipment() {
     int index = searchEquipment(name);
     if (index == -1) { printf("Not found!\n"); return; }
     int i;
-    for ( i = index; i < count - 1; i++) eq[i] = eq[i + 1];
+    for (i = index; i < count - 1; i++) eq[i] = eq[i + 1];
     count--;
     printf("Deleted!\n");
 }
@@ -380,13 +387,12 @@ int main() {
         printf("[4.] Return Equipment\n");
         printf("[5.] Search Equipment\n");
         printf("[6.] Sort Equipment\n");
-        printf("[7.] Process Borrow\n");
-        printf("[8.] Display Borrow List\n");
-        printf("[9.] Search by Category\n");
-        printf("[10.] Filter Equipment\n");
-        printf("[11.] Edit Equipment\n");
-        printf("[12.] Delete Equipment\n");
-        printf("[13.] Exit\n");
+        printf("[7.] Display Borrow List\n");
+        printf("[8.] Search by Category\n");
+        printf("[9.] Filter Equipment\n");
+        printf("[10.] Edit Equipment\n");
+        printf("[11.] Delete Equipment\n");
+        printf("[12.] Exit\n");
         printf("---------------------------------------------\n");
         printf("\nEnter choice: ");
 
@@ -395,7 +401,7 @@ int main() {
             while (getchar() != '\n');
             continue;
         }
-       printf("\n----------------------------------------------\n");
+        printf("\n----------------------------------------------\n");
 
         switch (choice) {
             case 1: addEquipment(); break;
@@ -414,14 +420,13 @@ int main() {
                 break;
             }
             case 6: sortEquipment(); break;
-            case 7: processQueue(); break;
-            case 8: displayQueue(); break;
-            case 9: searchByCategory(); break;
-            case 10: filterMenu(); break;
-            case 11: editEquipment(); break;
-            case 12: deleteEquipment(); break;
-            case 13: exit(0);
-            default: printf("Invalid choice! Please select between 1 and 13.\n");
+            case 7: displayQueue(); break;
+            case 8: searchByCategory(); break;
+            case 9: filterMenu(); break;
+            case 10: editEquipment(); break;
+            case 11: deleteEquipment(); break;
+            case 12: exit(0);
+            default: printf("Invalid choice! Please select between 1 and 12.\n");
         }
     }
     return 0;
