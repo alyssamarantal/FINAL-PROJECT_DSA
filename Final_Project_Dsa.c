@@ -12,6 +12,7 @@ void logBorrow(char student[], char item[], char date[], char time[]);
 void logReturn(char student[], char item[]);
 int searchEquipment(char name[]);
 int isValidEquipment(char name[]);
+void toLowerCase(char str[]);
 int isAllUppercase(char str[]);
 void insert(char student[], char item[], int priority, char date[], char time[]);
 
@@ -26,6 +27,7 @@ struct equipment {
 struct equipment eq[MAX];
 int count = 0; // Tracks total number of equipment
 
+// Singly Linked List
 struct node {
     char student[50];
     char equipment[50];
@@ -45,6 +47,13 @@ int isAllUppercase(char str[]) {
         if (islower(str[i])) return 0;
     }
     return 1;
+}
+
+void toLowerCase(char str[]) {
+    int i;
+    for (i = 0; str[i] != '\0'; i++) {
+        str[i] = tolower(str[i]);
+    }
 }
 
 // Adds new equipment or updates existing quantity
@@ -76,12 +85,14 @@ void addEquipment() {
     } else {
         printf("\nEnter category (Audio Visual /Cable /Accessory): ");
         scanf(" %[^\n]", category);
+        toLowerCase(category);
+
         strcpy(eq[count].name, name);
         strcpy(eq[count].category, category);
         printf("\nEnter quantity: ");
         scanf("%d", &eq[count].quantity);
         count++;
-        printf("\nEquipment added!\n");
+        printf("\nEquipment added successfully!\n");
     }
 }
 
@@ -221,6 +232,7 @@ void searchByCategory() {
 
     printf("Enter category to search: ");
     scanf(" %[^\n]", cat);
+    toLowerCase(cat);
 
     printf("\n-----------------------------------------------\n");
     printf("         SEARCH RESULT (Category: %s)\n", cat);
@@ -254,11 +266,11 @@ void filterMenu() {
     printf("\nEnter choice: ");
     scanf("%d", &choice);
 
-   const char *selected;
+  const char *selected;
 
-    if (choice == 1) selected = "Audio Visual";
-    else if (choice == 2) selected = "Cable";
-    else if (choice == 3) selected = "Accessory";
+    if (choice == 1) selected = "audio visual";
+    else if (choice == 2) selected = "cable";
+    else if (choice == 3) selected = "accessory";
     else {
         printf("Invalid choice!\n");
         return;
@@ -288,10 +300,20 @@ void filterMenu() {
 
 void displayBorrowList() {
     struct node *temp = front;
-    if (temp == NULL) { printf("No borrowing records.\n"); return; }
+    if (temp == NULL) {
+            printf("No borrowing records.\n");
+            return;
+    }
+
     printf("\n| %-15s | %-10s | %-12s | %-6s |\n", "Name", "Equipment", "Date", "Time");
+    printf("-------------------------------------------------------------\n");
     while (temp != NULL) {
-        printf("| %-15s | %-10s | %-12s | %-6s |\n", temp->student, temp->equipment, temp->date, temp->time);
+        printf("| %-15s | %-10s | %-12s | %-6s |\n",
+               temp->student,
+               temp->equipment,
+               temp->date,
+               temp->time);
+
         temp = temp->next;
     }
 }
