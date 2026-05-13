@@ -42,7 +42,8 @@ struct node *front = NULL;
 
 // Helper: Checks if string is all uppercase
 int isAllUppercase(char str[]) {
-    for (int i = 0; str[i] != '\0'; i++) {
+	int i;
+    for ( i = 0; str[i] != '\0'; i++) {
         if (islower(str[i])) return 0;
     }
     return 1;
@@ -70,16 +71,16 @@ void addEquipment() {
 
     if (index != -1) {
         printf("Equipment already exists!\n");
-        printf("Enter quantity to add: ");
+        printf("\nEnter quantity to add: ");
         scanf("%d", &qty);
         eq[index].quantity += qty;
         printf("Quantity updated! New quantity: %d pcs\n", eq[index].quantity);
     } else {
-        printf("Enter category (Device/Cable/Accessory): ");
+        printf("\nEnter category (Audio Visual /Cable /Accessory): ");
         scanf(" %[^\n]", category);
         strcpy(eq[count].name, name);
         strcpy(eq[count].category, category);
-        printf("Enter quantity: ");
+        printf("\nEnter quantity: ");
         scanf("%d", &eq[count].quantity);
         count++;
         printf("\nEquipment added!\n");
@@ -94,13 +95,15 @@ void displayEquipment() {
     printf("\n-----------------------------------------------\n");
     printf("| %-3s | %-15s | %-12s | %-3s |\n", "No", "Name", "Category", "Qty");
     printf("-----------------------------------------------\n");
-    for (int i = 0; i < count; i++) {
+    int i;
+    for ( i = 0; i < count; i++) {
         printf("| %-3d | %-15s | %-12s | %-3d |\n", i + 1, eq[i].name, eq[i].category, eq[i].quantity);
     }
 }
 
 int searchEquipment(char name[]) {
-    for (int i = 0; i < count; i++) {
+	int i;
+    for ( i = 0; i < count; i++) {
         if (strcmp(eq[i].name, name) == 0) return i;
     }
     return -1;
@@ -108,8 +111,10 @@ int searchEquipment(char name[]) {
 
 void sortEquipment() {
     struct equipment temp;
-    for (int i = 0; i < count - 1; i++) {
-        for (int j = 0; j < count - i - 1; j++) {
+    int i;
+    for ( i = 0; i < count - 1; i++) {
+    	int j;
+        for ( j = 0; j < count - i - 1; j++) {
             if (strcmp(eq[j].name, eq[j + 1].name) > 0) {
                 temp = eq[j];
                 eq[j] = eq[j + 1];
@@ -160,7 +165,7 @@ void borrowEquipment() {
     printf("Enter student name: ");
     scanf(" %[^\n]", student);
 
-    printf("Enter equipment (CAPS): ");
+    printf("\nEnter equipment (CAPS): ");
     scanf(" %[^\n]", item);
 
     if (!isValidEquipment(item)) {
@@ -178,11 +183,11 @@ void borrowEquipment() {
         return;
     }
 
-    printf("Enter priority (1=Teacher, 2=Student): ");
+    printf("\nEnter priority (1=Teacher, 2=Student): ");
     scanf("%d", &priority);
-    printf("Enter date: ");
+    printf("\nEnter date: ");
     scanf("%s", date);
-    printf("Enter time: ");
+    printf("\nEnter time: ");
     scanf("%s", timeStr);
 
     eq[index].quantity--;
@@ -196,11 +201,11 @@ void returnEquipment() {
     char student[50], item[50];
     printf("\nEnter name: ");
     scanf(" %[^\n]", student);
-    printf("Enter equipment to return (CAPS): ");
+    printf("\nEnter equipment to return (CAPS): ");
     scanf(" %[^\n]", item);
 
     int index = searchEquipment(item);
-    if (index == -1) {
+    if (index == -1) {;
         printf("Equipment not found!\n");
         return;
     }
@@ -224,33 +229,74 @@ void returnEquipment() {
 }
 
 void searchByCategory() {
-    char cat[50];
-    int found = 0;
+     char cat[50];
+    int i, found = 0;
+
     printf("Enter category to search: ");
-    scanf(" %[^\n]", cat);
-    printf("\nSEARCH RESULT (Category: %s)\n", cat);
-    for (int i = 0; i < count; i++) {
+    scanf("%s", cat);
+
+    printf("\n-------------------------------------------------\n");
+    printf("         SEARCH RESULT (Category: %s)\n", cat);
+    printf("--------------------------------------------------\n");
+
+    for (i = 0; i < count; i++) {
         if (strcmp(eq[i].category, cat) == 0) {
-            printf("%-5d %-15s %-15s %-10d pcs\n", i + 1, eq[i].name, eq[i].category, eq[i].quantity);
+            printf("%-5d %-15s %-15s %-10d pcs\n",
+                   i+1,
+                   eq[i].name,
+                   eq[i].category,
+                   eq[i].quantity);
             found = 1;
         }
     }
-    if (!found) printf("No equipment found in this category.\n");
+
+    if (!found) {
+        printf("No equipment found in this category.\n");
+    }
+
+    printf("-------------------------------------------------\n");
 }
 
 void filterMenu() {
-    int choice;
-    printf("\nFilter by Category:\n[1] Device\n[2] Cable\n[3] Accessory\nEnter choice: ");
+    int choice, i, found = 0;
+    
+   printf("\nFilter by Category:\n");
+    printf("[1] Audio Visual\n");
+    printf("[2] Cable\n");
+    printf("[3] Accessory\n");
+    printf("\nEnter choice: ");
     scanf("%d", &choice);
-    const char *selected = (choice == 1) ? "Device" : (choice == 2) ? "Cable" : (choice == 3) ? "Accessory" : NULL;
-    if (!selected) { printf("Invalid choice!\n"); return; }
 
-    printf("\nFILTERED: %s\n", selected);
-    for (int i = 0; i < count; i++) {
+   const char *selected;
+
+    if (choice == 1) selected = "Audio Visual";
+    else if (choice == 2) selected = "Cable";
+    else if (choice == 3) selected = "Accessory";
+    else {
+        printf("Invalid choice!\n");
+        return;
+    }
+
+    printf("\n----------------------------------------------\n");
+    printf("        FILTERED: %s\n", selected);
+    printf("------------------------------------------------\n");
+         
+    for (i = 0; i < count; i++) {
         if (strcmp(eq[i].category, selected) == 0) {
-            printf("%-5d %-15s %-15s %-10d pcs\n", i+1, eq[i].name, eq[i].category, eq[i].quantity);
+            printf("%-5d %-15s %-15s %-10d pcs\n",
+                   i+1,
+                   eq[i].name,
+                   eq[i].category,
+                   eq[i].quantity);
+            found = 1;
         }
     }
+
+    if (!found) {
+        printf("No equipment found.\n");
+    }
+
+    printf("------------------------------------------------\n");
 }
 
 void displayQueue() {
@@ -264,11 +310,14 @@ void displayQueue() {
 }
 
 void printReceipt(char student[], char item[], char date[], char time[]) {
-    printf("\n========== RECEIPT ==========\n");
-    printf("Name      : %s\nEquipment : %s\nDate      : %s\nTime      : %s\n", student, item, date, time);
-    printf("=============================\n");
+    printf("\n==================== RECEIPT ===============\n");
+    printf("             Name      : %s\n", student);
+    printf("             Equipment : %s\n", item);
+    printf("             Date      : %s\n", date);
+    printf("             Time      : %s\n", time);
+    printf("=============================================\n");
 }
-
+    
 void logBorrow(char student[], char item[], char date[], char time[]) {
     FILE *fp = fopen("borrow_history.txt", "a");
     if (fp) { fprintf(fp, "%s borrowed %s on %s at %s\n", student, item, date, time); fclose(fp); }
@@ -286,15 +335,15 @@ void editEquipment() {
     int index = searchEquipment(name);
     if (index == -1) { printf("Not found!\n"); return; }
 
-    printf("Enter new name (CAPS): ");
+    printf("\nEnter new name (CAPS): ");
     scanf(" %[^\n]", newName);
     if (!isAllUppercase(newName) || !isValidEquipment(newName)) {
         printf("Invalid name or not CAPS!\n");
         return;
     }
-    printf("Enter new category: ");
+    printf("\nEnter new category: ");
     scanf(" %[^\n]", newCategory);
-    printf("Enter new quantity: ");
+    printf("\nEnter new quantity: ");
     scanf("%d", &eq[index].quantity);
     strcpy(eq[index].name, newName);
     strcpy(eq[index].category, newCategory);
@@ -307,7 +356,8 @@ void deleteEquipment() {
     scanf(" %[^\n]", name);
     int index = searchEquipment(name);
     if (index == -1) { printf("Not found!\n"); return; }
-    for (int i = index; i < count - 1; i++) eq[i] = eq[i + 1];
+    int i;
+    for ( i = index; i < count - 1; i++) eq[i] = eq[i + 1];
     count--;
     printf("Deleted!\n");
 }
@@ -321,8 +371,8 @@ int main() {
     int choice;
     while (1) {
         printf("\n---------------------------------------------\n");
-        printf("             Hello CITZENS!                \n");
-        printf("   SCHOOL EQUIPMENT BORROWING SYSTEM\n");
+        printf("             Hello CITZENS!\n                \n");
+        printf("     SCHOOL EQUIPMENT BORROWING SYSTEM\n");
         printf("---------------------------------------------\n");
         printf("[1.] Add Equipment\n");
         printf("[2.] Display Equipment\n");
@@ -345,6 +395,7 @@ int main() {
             while (getchar() != '\n');
             continue;
         }
+       printf("\n----------------------------------------------\n");
 
         switch (choice) {
             case 1: addEquipment(); break;
